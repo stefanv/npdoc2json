@@ -1,6 +1,14 @@
+# /// pyproject
+# [project]
+# dependencies = [
+#     "rst-to-myst"
+# ]
+
 import inspect
 from numpydoc.docscrape import NumpyDocString, Parameter
 import sys
+
+import rst_to_myst
 
 
 modname = sys.argv[1]
@@ -10,6 +18,12 @@ mod = __import__(modname)
 def is_submodule(child, parent):
         return child.__name__.startswith(parent.__name__ + ".")
 
+
+def rst2myst(rst : str | list) -> str:
+    if isinstance(rst, list):
+        rst = '\n'.join(rst)
+
+    return rst_to_myst.mdformat_render.rst_to_myst(rst).text.strip()
 
 
 def walk_mod(mod, path=''):
@@ -23,6 +37,12 @@ def walk_mod(mod, path=''):
             if member.__doc__:
                 out[member_name] = dict(NumpyDocString(member.__doc__))
                 npdoc = out[member_name]
+
+                rst_fields = ['Extended Summary', 'Notes']
+                for field in rst_fields:
+                    if npdoc.get(field):
+                        npdoc[field] = rst2myst(npdoc[field])
+
                 for key, val in npdoc.items():
                     if isinstance(val, list) and len(val) > 0:
                         # Unpack parameter list
@@ -31,7 +51,7 @@ def walk_mod(mod, path=''):
                                 {
                                     'name': el.name,
                                     'type': el.type,
-                                    'desc': el.desc
+                                    'desc': rst2myst(el.desc)
                                 }
                                 for el in val
                             ]
