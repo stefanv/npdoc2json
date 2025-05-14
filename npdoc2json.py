@@ -8,6 +8,7 @@ import inspect
 from numpydoc.docscrape import NumpyDocString, Parameter
 import sys
 import types
+import json
 
 import rst_to_myst
 
@@ -32,7 +33,7 @@ def walk_mod(mod: types.ModuleType, path: str = "") -> dict:
     out = {}
 
     for member_name in members_names:
-        print("\033[0K", end="\r")  # Clear line
+        print("\033[0K", end="\r", file=sys.stderr)  # Clear line
         print(f"{path}.{member_name}", end="\r", file=sys.stderr)
 
         member = getattr(mod, member_name)
@@ -66,4 +67,4 @@ def walk_mod(mod: types.ModuleType, path: str = "") -> dict:
     return out
 
 
-print(walk_mod(mod, path="skimage"))
+print(json.dumps(walk_mod(mod, path="skimage")))
