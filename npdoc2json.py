@@ -32,6 +32,9 @@ def walk_mod(mod: types.ModuleType, path: str = "") -> dict:
     out = {}
 
     for member_name in members_names:
+        print("\033[0K", end="\r")  # Clear line
+        print(f"{path}.{member_name}", end="\r", file=sys.stderr)
+
         member = getattr(mod, member_name)
 
         if inspect.isfunction(member):
